@@ -51,22 +51,29 @@
   .empty { color: var(--muted); font-size: var(--label-size); margin: 0 auto; }
 
   /* click to view large */
-  img.item, video.item { cursor: zoom-in; }
+  img.item, video.item { cursor: default; }
   img.item:focus-visible, video.item:focus-visible { outline: 1px solid var(--muted); outline-offset: 4px; }
   #viewer {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
     padding: 4vh 4vw; box-sizing: border-box;
-    background: var(--background);
-    cursor: zoom-out;
+    /* the page shows through, softly blurred */
+    background: color-mix(in srgb, var(--viewer-color, var(--background)) var(--viewer-tint, 45%), transparent);
+    -webkit-backdrop-filter: blur(var(--viewer-blur, 18px));
+    backdrop-filter: blur(var(--viewer-blur, 18px));
+    cursor: default;
     opacity: 0; pointer-events: none;
     transition: opacity 160ms ease;
   }
   #viewer.open { opacity: 1; pointer-events: auto; }
   #viewer img, #viewer video {
-    max-width: 100%; max-height: 100%;
+    /* how big an opened image gets, as a share of the window */
+    max-width: var(--viewer-width, 62vw); max-height: var(--viewer-height, 72vh);
     width: auto; height: auto; display: block;
     object-fit: contain;
+  }
+  @media (max-width: 640px) {
+    #viewer img, #viewer video { max-width: 92vw; }
   }
   body.viewing { overflow: hidden; }
 </style>
@@ -138,9 +145,9 @@
       if (node) {
         if (it.type === 'image' || it.type === 'video') {
           node.tabIndex = 0;
-          node.addEventListener('click', function () { open(it); });
+          node.addEventListener('click', function () { open(it, node); });
           node.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(it); }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(it, node); }
           });
         }
         grid.appendChild(node);
@@ -148,10 +155,49 @@
     });
   }
 
+  // ── tint the blurred background with the clicked image's main color ──
+  // settings.css: --viewer-match: on | off   (off = use --viewer-color / background)
+  function matchOn() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--viewer-match');
+    return (v || 'on').trim().replace(/["']/g, '') !== 'off';
+  }
+  var colorCache = {};
+  function mainColor(source, key) {
+    if (colorCache[key] !== undefined) return colorCache[key];
+    var w = source.naturalWidth || source.videoWidth, h = source.naturalHeight || source.videoHeight;
+    if (!w || !h) return null;
+    try {
+      var c = document.createElement('canvas');
+      c.width = 40; c.height = 40;
+      var ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(source, 0, 0, 40, 40);
+      var d = ctx.getImageData(0, 0, 40, 40).data;
+      // vote by hue, weighted toward colorful pixels; greys barely count
+      var bins = new Array(24).fill(0), sumS = new Array(24).fill(0), total = 0, colorful = 0;
+      for (var i = 0; i < d.length; i += 4) {
+        var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, ch = max - min;
+        total++;
+        if (ch < 0.08 || l < 0.08 || l > 0.96) continue;
+        var s = ch / (1 - Math.abs(2 * l - 1));
+        var hh = max === r ? ((g - b) / ch) % 6 : max === g ? (b - r) / ch + 2 : (r - g) / ch + 4;
+        var hue = (hh * 60 + 360) % 360, bin = Math.floor(hue / 15) % 24;
+        bins[bin] += ch * ch; sumS[bin] += s; colorful++;
+      }
+      if (colorful < total * 0.06) { colorCache[key] = null; return null; } // basically grey
+      var best = 0;
+      for (var k = 1; k < 24; k++) if (bins[k] > bins[best]) best = k;
+      var hue2 = best * 15 + 7.5;
+      var sat = Math.min(90, Math.max(45, (sumS[best] / Math.max(1, colorful)) * 100 + 35));
+      colorCache[key] = 'hsl(' + hue2 + ' ' + sat + '% 76%)';   // kept light, like a wash
+      return colorCache[key];
+    } catch (e) { colorCache[key] = null; return null; }
+  }
+
   // ── click to view large; click anywhere or press Esc to close ──
   var viewer = document.getElementById('viewer');
   var lastFocus = null;
-  function open(it) {
+  function open(it, source) {
     lastFocus = document.activeElement;
     viewer.innerHTML = '';
     var big;
@@ -162,6 +208,9 @@
       big = el('img', { src: it.src, alt: '' });
     }
     viewer.appendChild(big);
+    var tint = matchOn() && source ? mainColor(source, it.id) : null;
+    if (tint) viewer.style.setProperty('--viewer-color', tint);
+    else viewer.style.removeProperty('--viewer-color');
     viewer.setAttribute('aria-hidden', 'false');
     viewer.classList.add('open');
     document.body.classList.add('viewing');
