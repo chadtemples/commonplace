@@ -1,0 +1,15 @@
+commonplace is a folder on my desktop.
+
+Anything I drop into it, a photo, a GIF, a line I overheard on the bus, shows up here about a minute later. There's no app, no upload screen, no caption field, no moment where I decide whether something is good enough to post. The gap between noticing something and keeping it is gone, so I keep more.
+
+It borrows from the commonplace book: the notebooks writers, scholars and tinkerers kept for centuries, copying in passages, recipes, quotes and observations worth coming back to. A commonplace book isn't organized by a system. It's organized by the act of collecting, by whatever caught your eye that week. This works the same way.
+
+How it works: my Mac watches the folder. When a file lands, a small script makes a web-sized copy, adds it to a list, and pushes it to GitHub, which hosts the page. Text lives in a single plain notebook file that stays in sync. Fix a typo on my laptop and the site follows. The file system is the CMS. Git is the database. The folder is the interface.
+
+---
+
+[your email]
+[@your handle]
+
+Newest first.
+Updated whenever I drop something in.

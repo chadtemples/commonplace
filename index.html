@@ -156,10 +156,10 @@
   }
 
   // ── tint the blurred background with the clicked image's main color ──
-  // settings.css: --viewer-match: on | off   (off = use --viewer-color / background)
+  // settings.css: --viewer-match: on | off (default off: plain blur, or --viewer-color if set)
   function matchOn() {
     var v = getComputedStyle(document.documentElement).getPropertyValue('--viewer-match');
-    return (v || 'on').trim().replace(/["']/g, '') !== 'off';
+    return (v || 'off').trim().replace(/["']/g, '') === 'on';
   }
   var colorCache = {};
   function mainColor(source, key) {
