@@ -81,7 +81,7 @@
   function render(items) {
     var grid = document.getElementById('grid');
     var count = document.querySelector('header .count');
-    count.textContent = 'Library (' + items.length + ')';
+    count.textContent = 'library (' + items.length + ')';
     if (!items.length) {
       var p = el('p', { class: 'empty' });
       p.textContent = 'Nothing here yet.';
