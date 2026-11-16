@@ -1,8 +1,10 @@
-COMMONPLACE is a folder on my desktop.
+COMMONPLACE is a folder on my desktop. It is also this website.
 
-Anything I drop into it, a photo, a GIF, a line I overheard in a dream, shows up here about a minute later. There is no app, no upload screen.
+Anything I drop into the folder posts here about a minute later. Image. Gif. Phrase overheard on bus or in dream. 
 
-It borrows from the commonplace book: the notebooks writers, scholars and tinkerers kept for centuries, copying in passages, recipes, quotes and observations worth coming back to. A commonplace book isn't organized by a system. It's organized by the act of collecting, by whatever caught your eye that week. This works the same way.
+I was inspired by the concept of "commonplace books," the notebooks writers, scholars, tinkerers kept to keep track of interesting passages, quotes, recipes, scraps of thought. They were the original tumblrs. 
+
+I was excited by the idea of a website with zero interface,  
 
 How it works: my Mac watches the folder. When a file lands, a small script makes a web-sized copy, adds it to a list, and pushes it to GitHub, which hosts the page. Text lives in a single plain notebook file that stays in sync. Fix a typo on my laptop and the site follows. The file system is the CMS. Git is the database. The folder is the interface.
 
@@ -11,5 +13,3 @@ How it works: my Mac watches the folder. When a file lands, a small script makes
 [https://temples.studio]
 [https://www.are.na/temples-studio]
 
-Newest first.
-Updated whenever I drop something in.
