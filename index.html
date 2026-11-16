@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>commonplace</title>
+<link rel="stylesheet" href="settings.css">
+<style>
+  html, body { margin: 0; background: var(--background); }
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    padding: 20px 0 120px;
+  }
+  header {
+    display: flex; justify-content: center; gap: 14px;
+    font-size: var(--label-size); line-height: 16px; letter-spacing: 0.02em;
+  }
+  header .count { color: var(--muted); }
+  main {
+    max-width: var(--page-width);
+    margin: 72px auto 0;
+    padding: 0 clamp(16px, 4vw, 48px);
+    display: flex; flex-wrap: wrap;
+    justify-content: space-between; align-items: center;
+    column-gap: var(--gap); row-gap: var(--row-gap);
+  }
+  /* keeps a short last row packed to the left instead of stretched */
+  main::after { content: ""; flex: 1 1 auto; }
+
+  .item { display: block; max-width: 100%; }
+  img.item, video.item { width: auto; object-fit: cover; }
+  .s1 { height: calc(130px * var(--image-scale)); }
+  .s2 { height: calc(155px * var(--image-scale)); }
+  .s3 { height: calc(175px * var(--image-scale)); }
+  .s4 { height: calc(200px * var(--image-scale)); }
+  .s5 { height: calc(235px * var(--image-scale)); }
+  img.item, video.item { max-height: 70vh; }
+
+  .scrap { display: flex; flex-direction: column; gap: 8px; }
+  .scrap p {
+    margin: 0; font-size: var(--text-size); line-height: 1.4;
+    white-space: pre-line; text-wrap: pretty; overflow-wrap: anywhere;
+  }
+  .scrap .note { font-size: var(--label-size); line-height: 15px; color: var(--muted); }
+  .w1 { width: calc(190px * var(--image-scale) + 40px); }
+  .w2 { width: calc(220px * var(--image-scale) + 40px); }
+  .w3 { width: calc(260px * var(--image-scale) + 40px); }
+
+  .empty { color: var(--muted); font-size: var(--label-size); margin: 0 auto; }
+</style>
+</head>
+<body>
+<header>
+  <span class="name"></span>
+  <span class="count"></span>
+</header>
+<main id="grid" aria-live="polite"></main>
+
+<script>
+(function () {
+  var root = getComputedStyle(document.documentElement);
+  var name = (root.getPropertyValue('--site-name') || 'commonplace').trim().replace(/^["']|["']$/g, '');
+  document.title = name;
+  document.querySelector('header .name').textContent = name;
+
+  // same item always gets the same size
+  function pick(id, n) {
+    var h = 0;
+    for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return (h % n) + 1;
+  }
+
+  function el(tag, attrs) {
+    var e = document.createElement(tag);
+    for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function render(items) {
+    var grid = document.getElementById('grid');
+    var count = document.querySelector('header .count');
+    count.textContent = 'Library (' + items.length + ')';
+    if (!items.length) {
+      var p = el('p', { class: 'empty' });
+      p.textContent = 'Nothing here yet.';
+      grid.appendChild(p);
+      return;
+    }
+    items.forEach(function (it) {
+      var node;
+      if (it.type === 'image') {
+        node = el('img', {
+          src: it.src, alt: '', loading: 'lazy', decoding: 'async',
+          width: it.w, height: it.h,
+          class: 'item s' + pick(it.id, 5)
+        });
+      } else if (it.type === 'video') {
+        node = el('video', {
+          src: it.src, autoplay: '', muted: '', loop: '', playsinline: '',
+          preload: 'metadata', class: 'item s' + pick(it.id, 5)
+        });
+        node.muted = true;
+      } else if (it.type === 'text') {
+        var len = (it.text || '').length;
+        node = el('div', { class: 'item scrap ' + (len < 50 ? 'w1' : len < 130 ? 'w2' : 'w3') });
+        var p = el('p');
+        p.textContent = it.text;
+        node.appendChild(p);
+        if (it.note) {
+          var n = el('span', { class: 'note' });
+          n.textContent = it.note;
+          node.appendChild(n);
+        }
+      }
+      if (node) grid.appendChild(node);
+    });
+  }
+
+  fetch('items.json?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .catch(function () { return []; })
+    .then(render);
+})();
+</script>
+</body>
+</html>
