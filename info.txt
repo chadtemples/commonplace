@@ -8,8 +8,8 @@ How it works: my Mac watches the folder. When a file lands, a small script makes
 
 ---
 
-[chad.temples@gmail.com]
-[@te]
+[https://temples.studio]
+[https://www.are.na/temples-studio]
 
 Newest first.
 Updated whenever I drop something in.
