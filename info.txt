@@ -1,12 +1,10 @@
 COMMONPLACE is a folder on my desktop. It is also this website.
 
-Anything I drop into the folder posts here about a minute later. Image. Gif. Phrase overheard on bus or in dream. 
+I was excited by the idea of a website with zero interface, published locally from my a simple folder on my desktop. 
 
-I was inspired by the concept of "commonplace books," the notebooks writers, scholars, tinkerers kept to keep track of interesting passages, quotes, recipes, scraps of thought. They were the original tumblrs. 
+Anything I drop into the folder posts here about a minute later. Style and text is controlled from a single .txt file that stays in sync.
 
-I was excited by the idea of a website with zero interface,  
-
-How it works: my Mac watches the folder. When a file lands, a small script makes a web-sized copy, adds it to a list, and pushes it to GitHub, which hosts the page. Text lives in a single plain notebook file that stays in sync. Fix a typo on my laptop and the site follows. The file system is the CMS. Git is the database. The folder is the interface.
+I was inspired by the concept of "commonplace books," the notebooks writers and thinkers used to keep track of interesting passages, quotes, recipes, scraps of thought. Commonplace books were the original analog tumblrs. 
 
 ---
 
