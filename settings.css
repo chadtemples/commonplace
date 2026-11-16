@@ -6,7 +6,7 @@
 
 :root {
   /* the little name at the top (keep the quotes) */
-  --site-name: "commonplace";
+  --site-name: "~/commonplace";
 
   /* colors */
   --background: #f2f2f2;
