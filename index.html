@@ -282,24 +282,45 @@
   // the middle column (above) from the right-hand column (below). Links auto-link.
   var info = document.getElementById('info');
   var infoBtn = document.querySelector('header .info-link');
+  var LINK_RE = /(https?:\/\/[^\s]+|[\w.+-]+@[\w-]+\.[\w.-]+|(?:[\w-]+\.)+(?:com|org|net|io|na|world|xyz|art|studio|design|co|me|site|page)(?:\/[^\s]*)?)/g;
+  function href(t) {
+    if (t.indexOf('@') > 0 && t.indexOf('/') < 0) return 'mailto:' + t;
+    return /^https?:/.test(t) ? t : 'https://' + t;
+  }
+  function link(text, url) {
+    var a = document.createElement('a');
+    a.textContent = text;
+    a.href = href(url);
+    if (!/^mailto:/.test(a.href)) { a.target = '_blank'; a.rel = 'noopener'; }
+    return a;
+  }
+  function addLine(p, line) {
+    // "portfolio: https://example.com"  →  a link that reads "portfolio"
+    var lab = line.match(/^\s*([^:\n]{1,40}?)\s*:\s+(\S+)\s*$/);
+    if (lab && lab[2].match(LINK_RE) && lab[2].match(LINK_RE)[0] === lab[2].replace(/[.,;)]+$/, '')) {
+      p.appendChild(link(lab[1], lab[2].replace(/[.,;)]+$/, '')));
+      return;
+    }
+    var last = 0, m;
+    LINK_RE.lastIndex = 0;
+    while ((m = LINK_RE.exec(line))) {
+      var t = m[0].replace(/[.,;:)]+$/, '');
+      p.appendChild(document.createTextNode(line.slice(last, m.index)));
+      p.appendChild(link(t, t));
+      last = m.index + t.length;
+      LINK_RE.lastIndex = last;
+    }
+    p.appendChild(document.createTextNode(line.slice(last)));
+  }
   function addParas(box, text) {
     text.split(/\n\s*\n/).forEach(function (para) {
       para = para.replace(/^\s+|\s+$/g, '');
       if (!para) return;
       var p = document.createElement('p');
-      var re = /(https?:\/\/[^\s]+|[\w.+-]+@[\w-]+\.[\w.-]+|(?:[\w-]+\.)+(?:com|org|net|io|world|xyz|art|studio|design|co)(?:\/[^\s]*)?)/g;
-      var last = 0, m;
-      while ((m = re.exec(para))) {
-        p.appendChild(document.createTextNode(para.slice(last, m.index)));
-        var a = document.createElement('a'), t = m[0].replace(/[.,;:)]+$/, '');
-        a.textContent = t;
-        a.href = t.indexOf('@') > 0 && t.indexOf('/') < 0 ? 'mailto:' + t : (/^https?:/.test(t) ? t : 'https://' + t);
-        if (!/^mailto:/.test(a.href)) { a.target = '_blank'; a.rel = 'noopener'; }
-        p.appendChild(a);
-        last = m.index + t.length;
-        re.lastIndex = last;
-      }
-      p.appendChild(document.createTextNode(para.slice(last)));
+      para.split('\n').forEach(function (line, i) {
+        if (i) p.appendChild(document.createTextNode('\n'));
+        addLine(p, line);
+      });
       box.appendChild(p);
     });
   }
