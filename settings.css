@@ -19,7 +19,7 @@
   --label-size: 11px;     /* header + small grey lines */
 
   /* images: 1 = as designed, 1.3 = 30% bigger, 0.8 = smaller */
-  --image-scale: 1;
+  --image-scale: 1.5;
 
   /* spacing */
   --gap: 72px;            /* space between items in a row */
@@ -30,7 +30,7 @@
 /* phones: everything a bit smaller and closer */
 @media (max-width: 640px) {
   :root {
-    --image-scale: 0.62;
+    --image-scale: 0.9;
     --gap: 28px;
     --row-gap: 44px;
   }
