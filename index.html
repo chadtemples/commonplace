@@ -76,14 +76,63 @@
     #viewer img, #viewer video { max-width: 92vw; }
   }
   body.viewing { overflow: hidden; }
+
+  /* header link */
+  header .info-link {
+    font: inherit; color: var(--muted); background: none; border: 0; padding: 0;
+    cursor: pointer; letter-spacing: inherit;
+  }
+  header .info-link:hover { color: var(--text); }
+
+  /* information panel */
+  #info {
+    position: fixed; inset: 0; z-index: 11;
+    display: flex; align-items: center; justify-content: center;
+    padding: 4vh 4vw; box-sizing: border-box;
+    background: color-mix(in srgb, var(--background) 45%, transparent);
+    -webkit-backdrop-filter: blur(var(--viewer-blur, 18px));
+    backdrop-filter: blur(var(--viewer-blur, 18px));
+    opacity: 0; pointer-events: none; transition: opacity 160ms ease;
+  }
+  #info.open { opacity: 1; pointer-events: auto; }
+  #info .panel {
+    position: relative;
+    width: min(1100px, 100%); max-height: 100%; overflow: auto; box-sizing: border-box;
+    background: var(--info-background, #e8463a); color: var(--info-text, #111);
+    padding: 18px 20px 28px;
+    display: grid; grid-template-columns: 200px minmax(0, 1fr) 220px; column-gap: 32px;
+    font-size: var(--info-size, 15px); line-height: 1.38;
+    box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  }
+  #info .label { margin: 0; font-size: inherit; font-weight: normal; }
+  #info .main p, #info .side p { margin: 0 0 1.1em; white-space: pre-line; }
+  #info .main p:last-child, #info .side p:last-child { margin-bottom: 0; }
+  #info a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  #info .ok {
+    position: absolute; top: 14px; right: 18px;
+    font: inherit; color: inherit; background: none; border: 0; padding: 4px; cursor: pointer;
+  }
+  #info .ok:hover { text-decoration: underline; }
+  @media (max-width: 760px) {
+    #info .panel { grid-template-columns: 1fr; row-gap: 18px; padding-top: 16px; }
+  }
 </style>
 </head>
 <body>
 <header>
   <span class="name"></span>
   <span class="count"></span>
+  <button class="info-link" type="button" aria-haspopup="dialog" hidden>information</button>
 </header>
 <main id="grid" aria-live="polite"></main>
+<div id="info" role="dialog" aria-modal="true" aria-labelledby="info-label" aria-hidden="true">
+  <div class="panel">
+    <h2 class="label" id="info-label">information</h2>
+    <div class="main"></div>
+    <div class="side"></div>
+    <button class="ok" type="button">OK</button>
+  </div>
+</div>
 <div id="viewer" role="dialog" aria-modal="true" aria-label="Enlarged view" aria-hidden="true"></div>
 
 <script>
@@ -226,7 +275,63 @@
     if (lastFocus) lastFocus.focus({ preventScroll: true });
   }
   viewer.addEventListener('click', close);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); closeInfo(); } });
+
+  // ── information panel: text comes from info.txt ──
+  // info.txt: paragraphs separated by blank lines; a line of --- splits
+  // the middle column (above) from the right-hand column (below). Links auto-link.
+  var info = document.getElementById('info');
+  var infoBtn = document.querySelector('header .info-link');
+  function addParas(box, text) {
+    text.split(/\n\s*\n/).forEach(function (para) {
+      para = para.replace(/^\s+|\s+$/g, '');
+      if (!para) return;
+      var p = document.createElement('p');
+      var re = /(https?:\/\/[^\s]+|[\w.+-]+@[\w-]+\.[\w.-]+|(?:[\w-]+\.)+(?:com|org|net|io|world|xyz|art|studio|design|co)(?:\/[^\s]*)?)/g;
+      var last = 0, m;
+      while ((m = re.exec(para))) {
+        p.appendChild(document.createTextNode(para.slice(last, m.index)));
+        var a = document.createElement('a'), t = m[0].replace(/[.,;:)]+$/, '');
+        a.textContent = t;
+        a.href = t.indexOf('@') > 0 && t.indexOf('/') < 0 ? 'mailto:' + t : (/^https?:/.test(t) ? t : 'https://' + t);
+        if (!/^mailto:/.test(a.href)) { a.target = '_blank'; a.rel = 'noopener'; }
+        p.appendChild(a);
+        last = m.index + t.length;
+        re.lastIndex = last;
+      }
+      p.appendChild(document.createTextNode(para.slice(last)));
+      box.appendChild(p);
+    });
+  }
+  fetch('info.txt?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.text() : ''; })
+    .catch(function () { return ''; })
+    .then(function (txt) {
+      txt = (txt || '').replace(/\r\n?/g, '\n').trim();
+      if (!txt) return;                       // no info.txt → no link
+      var parts = txt.split(/\n\s*-{3,}\s*\n/);
+      addParas(info.querySelector('.main'), parts[0] || '');
+      addParas(info.querySelector('.side'), parts.slice(1).join('\n\n'));
+      infoBtn.hidden = false;
+    });
+  var infoReturn = null;
+  function openInfo() {
+    infoReturn = document.activeElement;
+    info.classList.add('open');
+    info.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('viewing');
+    info.querySelector('.ok').focus();
+  }
+  function closeInfo() {
+    if (!info.classList.contains('open')) return;
+    info.classList.remove('open');
+    info.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('viewing');
+    if (infoReturn) infoReturn.focus({ preventScroll: true });
+  }
+  infoBtn.addEventListener('click', openInfo);
+  info.querySelector('.ok').addEventListener('click', closeInfo);
+  info.addEventListener('click', function (e) { if (e.target === info) closeInfo(); });
 
   fetch('items.json?v=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : []; })

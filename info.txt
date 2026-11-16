@@ -10,6 +10,6 @@ How it works: my Mac watches the folder. When a file lands, a small script makes
 
 ---
 
-[https://temples.studio]
-[https://www.are.na/temples-studio]
+portfolio: https://temples.studio
+are.na: https://www.are.na/temples-studio
 
