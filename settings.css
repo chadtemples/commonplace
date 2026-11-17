@@ -5,6 +5,7 @@
    ───────────────────────────────────────────── */
 
 :root {
+  --m: clamp(20px, 2.4vw, 36px);
   --about-style: text;
   /* the little name at the top (keep the quotes) */
   --site-name: "~/commonplace";

@@ -243,6 +243,9 @@
     text-decoration: none; background: #fff; color: #000; padding: 0 .22em; margin: 0 -.06em; border-radius: 2px;
   }
   header .info-link:hover { padding: 0 .3em; margin: 0 -.14em; }
+
+  /* focus outlines only for keyboard users */
+  :focus:not(:focus-visible) { outline: none; }
 </style>
 </head>
 <body>
@@ -342,9 +345,9 @@
       if (node) {
         if (it.type === 'image' || it.type === 'video') {
           node.tabIndex = 0;
-          node.addEventListener('click', function () { open(it, node); });
+          node.addEventListener('click', function (e) { kbd = e.detail === 0; open(it, node); });
           node.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(it, node); }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); kbd = true; open(it, node); }
           });
         }
         grid.appendChild(node);
@@ -394,6 +397,7 @@
   // ── click to view large; click anywhere or press Esc to close ──
   var viewer = document.getElementById('viewer');
   var lastFocus = null;
+  var kbd = false;   // was the last overlay opened from the keyboard?
   function open(it, source) {
     lastFocus = document.activeElement;
     viewer.innerHTML = '';
@@ -420,7 +424,8 @@
     viewer.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('viewing');
     setTimeout(function () { if (!viewer.classList.contains('open')) viewer.innerHTML = ''; }, 200);
-    if (lastFocus) lastFocus.focus({ preventScroll: true });
+    if (lastFocus && kbd) lastFocus.focus({ preventScroll: true });
+    else if (document.activeElement) document.activeElement.blur();
   }
   viewer.addEventListener('click', close);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); closeInfo(); } });
@@ -432,7 +437,8 @@
     themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
     themeBtn.setAttribute('aria-label', dark ? 'Switch to light background' : 'Switch to dark background');
   }
-  themeBtn.addEventListener('click', function () {
+  themeBtn.addEventListener('click', function (e) {
+    if (e.detail > 0) themeBtn.blur();   // clicked with a mouse/finger, not the keyboard
     var dark = document.documentElement.dataset.theme !== 'dark';
     if (dark) document.documentElement.dataset.theme = 'dark';
     else delete document.documentElement.dataset.theme;
@@ -512,13 +518,16 @@
     info.classList.remove('open');
     info.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('viewing');
-    if (infoReturn) infoReturn.focus({ preventScroll: true });
+    if (infoReturn && kbd) infoReturn.focus({ preventScroll: true });
+    else if (document.activeElement) document.activeElement.blur();
   }
   function aboutStyle() {
     var v = getComputedStyle(document.documentElement).getPropertyValue('--about-style');
     return (v || 'text').trim().replace(/["']/g, '');
   }
-  infoBtn.addEventListener('click', function () {
+  infoBtn.addEventListener('click', function (e) {
+    kbd = e.detail === 0;
+    if (!kbd) infoBtn.blur();
     info.classList.toggle('panel', aboutStyle() === 'panel');
     info.classList.toggle('sheet', aboutStyle() === 'sheet');
     openInfo();
