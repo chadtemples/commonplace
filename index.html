@@ -133,13 +133,16 @@
   #info .x {
     display: none; font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; cursor: pointer; line-height: 1;
   }
+  /* no visible close: click anywhere or press Esc. Keyboard users still get it on Tab. */
   #info .close {
     position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
-    font: inherit; color: inherit; background: none; border: 0; cursor: pointer;
+    font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer;
   }
   #info .close:focus-visible {
-    width: auto; height: auto; clip: auto; overflow: visible; top: 0; right: 0; padding: 2px 6px; outline: 1px solid currentColor;
+    width: auto; height: auto; clip: auto; overflow: visible; top: 0; right: 0;
+    outline: 1px solid currentColor; outline-offset: 4px;
   }
+  #info .about:focus { outline: none; }
 
   /* docked panel variant: settings.css  --about-style: panel; */
   #info.panel { align-items: flex-end; justify-content: flex-end; padding: 0; }
@@ -441,7 +444,7 @@
     info.classList.add('open');
     info.setAttribute('aria-hidden', 'false');
     document.body.classList.add('viewing');
-    (info.classList.contains('panel') || info.classList.contains('sheet') ? info.querySelector('.x') : info.querySelector('.close')).focus({ preventScroll: true });
+    var box = info.querySelector('.about'); box.tabIndex = -1; box.focus({ preventScroll: true });
   }
   function closeInfo() {
     if (!info.classList.contains('open')) return;
