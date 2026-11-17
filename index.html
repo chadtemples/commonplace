@@ -195,13 +195,60 @@
   @media (max-width: 760px) {
     #info .about { grid-template-columns: 1fr; row-gap: 1em; margin-top: 4vh; font-size: var(--about-size-phone, 17px); }
     #info.panel .about { width: 100vw; }
-  }}}}
+  }
+
+  /* one size · one margin · pinned sentence header */
+  body { padding: 0 0 120px; font-size: var(--size, 16px); line-height: var(--leading, 1.3); }
+
+  header {
+    position: fixed; top: var(--m, 18px); left: var(--m, 18px); right: calc(var(--m, 18px) * 3); z-index: 6;
+    display: block; max-width: 34em;
+    font-size: var(--size, 16px); line-height: var(--leading, 1.3); letter-spacing: 0;
+    color: #fff; mix-blend-mode: difference; pointer-events: none;
+  }
+  header .name { display: none; }
+  header .sentence { pointer-events: auto; }
+  header .info-link {
+    font: inherit; color: inherit; letter-spacing: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+  }
+  header .info-link:hover { color: inherit; text-decoration-thickness: 2px; }
+  header .ago { font-style: italic; }
+
+  .theme-toggle { top: calc(var(--m, 18px) - 6px); right: calc(var(--m, 18px) - 6px); color: #fff; mix-blend-mode: difference; }
+
+  main {
+    max-width: none; margin: calc(var(--m, 18px) * 7) 0 0; padding: 0 var(--m, 18px);
+  }
+  .scrap p { font-size: var(--size, 16px); line-height: var(--leading, 1.3); }
+  .scrap .note { font-size: var(--size, 16px); line-height: var(--leading, 1.3); font-style: italic; color: var(--muted); }
+  .scrap { gap: 0; }
+
+  #info { padding: 0; }
+  #info .about {
+    margin: 0; padding: calc(var(--m, 18px) * 5) var(--m, 18px) var(--m, 18px); width: 100%; max-width: none;
+    font-size: var(--size, 16px); line-height: var(--leading, 1.3);
+    grid-template-columns: minmax(0, 34em) minmax(0, 1fr); column-gap: calc(var(--m, 18px) * 3);
+  }
+  #info .main p, #info .side p { margin-bottom: calc(var(--leading, 1.3) * 1em); }
+  @media (max-width: 760px) {
+    :where(:root) { --size: 15px; --m: 14px; }
+    #info .about { grid-template-columns: 1fr; font-size: var(--size, 16px); padding-top: calc(var(--m, 18px) * 7); }
+    main { margin-top: calc(var(--m, 18px) * 9); }
+    header { right: 54px; }
+  }
+
+  /* the link in the header sentence: a 'selected' highlight */
+          header .info-link {
+    text-decoration: none; background: #fff; color: #000; padding: 0 .22em; margin: 0 -.06em; border-radius: 2px;
+  }
+  header .info-link:hover { padding: 0 .3em; margin: 0 -.14em; }
 </style>
 </head>
 <body>
 <header>
   <span class="name"></span>
-  <button class="info-link" type="button" aria-haspopup="dialog" hidden>about</button>
+  <span class="sentence"><span class="site"></span> is <button class="info-link" type="button" aria-haspopup="dialog">a folder on my desktop</button>, <span class="ago">last updated —</span>.</span>
 </header>
 <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark background">
   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
@@ -230,6 +277,7 @@
   var name = (root.getPropertyValue('--site-name') || 'commonplace').trim().replace(/^["']|["']$/g, '');
   document.title = name;
   document.querySelector('header .name').textContent = name;
+  document.querySelector('header .site').textContent = name;
 
   // same item always gets the same size
   function pick(id, n) {
@@ -244,7 +292,20 @@
     return e;
   }
 
+  function ago(iso) {
+    var t = Date.parse(iso); if (isNaN(t)) return '';
+    var s = Math.max(0, (Date.now() - t) / 1000), m = s / 60, h = m / 60, d = h / 24;
+    if (m < 2) return 'just now';
+    if (m < 60) return Math.round(m) + ' minutes ago';
+    if (h < 1.5) return 'an hour ago';
+    if (h < 24) return Math.round(h) + ' hours ago';
+    if (d < 1.5) return 'yesterday';
+    if (d < 30) return Math.round(d) + ' days ago';
+    return new Date(t).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  }
   function render(items) {
+    var newest = items.reduce(function (a, it) { return it.added && it.added > a ? it.added : a; }, '');
+    document.querySelector('header .ago').textContent = newest ? 'last updated ' + ago(newest) : 'just started';
     var grid = document.getElementById('grid');
     if (!items.length) {
       var p = el('p', { class: 'empty' });
