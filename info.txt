@@ -1,10 +1,10 @@
-COMMONPLACE is a folder on my desktop. It is also this website.
+~/commonplace is a folder on my desktop. It is also this website.
 
-I was excited by the idea of a website with zero interface, published locally from my a simple folder on my desktop. 
+I was excited by the idea of a website with zero interface, published locally from a single folder on my desktop. 
 
 Anything I drop into the folder posts here about a minute later. Style and text is controlled from a single .txt file that stays in sync.
 
-I was inspired by the concept of "commonplace books," the notebooks writers and thinkers used to keep track of interesting passages, quotes, recipes, scraps of thought. Commonplace books were the original analog tumblrs. 
+Inspired by the concept of "commonplace books," the notebooks writers and thinkers used to keep track of interesting passages, quotes, recipes, scraps of thought. Commonplace books were the original analog tumblrs. 
 
 ---
 
