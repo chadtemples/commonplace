@@ -112,33 +112,87 @@
     position: fixed; inset: 0; z-index: 11;
     display: flex; align-items: center; justify-content: center;
     padding: 4vh 4vw; box-sizing: border-box;
-    background: color-mix(in srgb, var(--background) 45%, transparent);
-    -webkit-backdrop-filter: blur(var(--viewer-blur, 18px));
-    backdrop-filter: blur(var(--viewer-blur, 18px));
+    background: color-mix(in srgb, var(--background) 55%, transparent);
+    -webkit-backdrop-filter: blur(var(--about-blur, 22px));
+    backdrop-filter: blur(var(--about-blur, 22px));
     opacity: 0; pointer-events: none; transition: opacity 160ms ease;
   }
   #info.open { opacity: 1; pointer-events: auto; }
-  #info .panel {
-    position: relative;
-    width: min(1100px, 100%); max-height: 100%; overflow: auto; box-sizing: border-box;
-    background: var(--info-background, #e8463a); color: var(--info-text, #111);
-    padding: 18px 20px 28px;
-    display: grid; grid-template-columns: 200px minmax(0, 1fr) 220px; column-gap: 32px;
-    font-size: var(--info-size, 15px); line-height: 1.38;
-    box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  /* about: plain text on the blurred page (default), or a small flat panel docked bottom-right */
+  #info { align-items: flex-start; }
+  #info .about {
+    position: relative; width: min(1100px, 100%); max-height: 100%; overflow: auto; box-sizing: border-box;
+    margin-top: 9vh; color: var(--text);
+    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: clamp(28px, 6vw, 96px);
+    font-size: var(--about-size, 20px); line-height: 1.3;
   }
-  #info .label { margin: 0; font-size: inherit; font-weight: normal; }
-  #info .main p, #info .side p { margin: 0 0 1.1em; white-space: pre-line; }
+  #info .about h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: 0; }
+  #info .main p, #info .side p { margin: 0 0 1em; white-space: pre-line; }
   #info .main p:last-child, #info .side p:last-child { margin-bottom: 0; }
-  #info a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-  #info .ok {
-    position: absolute; top: 14px; right: 18px;
-    font: inherit; color: inherit; background: none; border: 0; padding: 4px; cursor: pointer;
+  #info a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  #info .x {
+    display: none; font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; cursor: pointer; line-height: 1;
   }
-  #info .ok:hover { text-decoration: underline; }
+  #info .close {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+    font: inherit; color: inherit; background: none; border: 0; cursor: pointer;
+  }
+  #info .close:focus-visible {
+    width: auto; height: auto; clip: auto; overflow: visible; top: 0; right: 0; padding: 2px 6px; outline: 1px solid currentColor;
+  }
+
+  /* docked panel variant: settings.css  --about-style: panel; */
+  #info.panel { align-items: flex-end; justify-content: flex-end; padding: 0; }
+  #info.panel .about {
+    width: min(460px, 100vw); margin: 0; max-height: 80vh;
+    display: block; padding: 14px 18px 18px;
+    background: var(--panel-background, #b3b3b3); color: var(--panel-text, #111111);
+    font-size: var(--label-size); line-height: 1.45;
+  }
+  :root[data-theme="dark"] #info.panel .about { background: var(--dark-panel-background, #2a2a2a); color: var(--dark-panel-text, #ececec); }
+  #info.panel .about h2 {
+    position: static; width: auto; height: auto; clip: auto; overflow: visible;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: inherit; font-weight: normal; margin: 0 0 14px;
+  }
+  #info.panel .x { display: inline; }
+  #info.panel .main { margin-bottom: 16px; }
+  #info.panel .close { display: none; }
+
+
+  /* sheet variant: settings.css  --about-style: sheet;  (flat sheet docked top-left, no blur) */
+  #info.sheet {
+    align-items: flex-start; justify-content: flex-start; padding: 0;
+    background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  #info.sheet .about {
+    width: min(620px, 100vw); margin: 0; max-height: 100vh; display: block;
+    padding: 18px 20px 22px;
+    background: var(--sheet-background, #ffffff); color: var(--sheet-text, #111111);
+    font-size: var(--sheet-size, 15px); line-height: 1.4;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.06);
+  }
+  :root[data-theme="dark"] #info.sheet .about {
+    background: var(--dark-sheet-background, #000000); color: var(--dark-sheet-text, #ececec);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12);
+  }
+  #info.sheet .about h2 {
+    position: static; width: auto; height: auto; clip: auto; overflow: visible;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    font-size: inherit; font-weight: 600; margin: 0 0 16px;
+  }
+  #info.sheet .x { display: inline; font-weight: 600; }
+  #info.sheet .x::before { content: "(close)"; }
+  #info.sheet .x { font-size: 0; }
+  #info.sheet .x::before { font-size: var(--sheet-size, 15px); }
+  #info.sheet .x:hover { text-decoration: underline; text-underline-offset: 3px; }
+  #info.sheet .main { margin-bottom: 18px; }
+  #info.sheet .side p { margin: 0; }
+  #info.sheet .close { display: none; }
   @media (max-width: 760px) {
-    #info .panel { grid-template-columns: 1fr; row-gap: 18px; padding-top: 16px; }
-  }
+    #info .about { grid-template-columns: 1fr; row-gap: 1em; margin-top: 4vh; font-size: var(--about-size-phone, 17px); }
+    #info.panel .about { width: 100vw; }
+  }}}}
 </style>
 </head>
 <body>
@@ -158,11 +212,11 @@
 </button>
 <main id="grid" aria-live="polite"></main>
 <div id="info" role="dialog" aria-modal="true" aria-labelledby="info-label" aria-hidden="true">
-  <div class="panel">
-    <h2 class="label" id="info-label">about</h2>
+  <div class="about">
+    <h2 id="info-label"><span>about</span><button class="x" type="button" aria-label="Close">×</button></h2>
     <div class="main"></div>
     <div class="side"></div>
-    <button class="ok" type="button">OK</button>
+    <button class="close" type="button">close</button>
   </div>
 </div>
 <div id="viewer" role="dialog" aria-modal="true" aria-label="Enlarged view" aria-hidden="true"></div>
@@ -387,7 +441,7 @@
     info.classList.add('open');
     info.setAttribute('aria-hidden', 'false');
     document.body.classList.add('viewing');
-    info.querySelector('.ok').focus();
+    (info.classList.contains('panel') || info.classList.contains('sheet') ? info.querySelector('.x') : info.querySelector('.close')).focus({ preventScroll: true });
   }
   function closeInfo() {
     if (!info.classList.contains('open')) return;
@@ -396,9 +450,22 @@
     document.body.classList.remove('viewing');
     if (infoReturn) infoReturn.focus({ preventScroll: true });
   }
-  infoBtn.addEventListener('click', openInfo);
-  info.querySelector('.ok').addEventListener('click', closeInfo);
-  info.addEventListener('click', function (e) { if (e.target === info) closeInfo(); });
+  function aboutStyle() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--about-style');
+    return (v || 'text').trim().replace(/["']/g, '');
+  }
+  infoBtn.addEventListener('click', function () {
+    info.classList.toggle('panel', aboutStyle() === 'panel');
+    info.classList.toggle('sheet', aboutStyle() === 'sheet');
+    openInfo();
+  });
+  info.querySelector('.x').addEventListener('click', closeInfo);
+  info.querySelector('.close').addEventListener('click', closeInfo);
+  info.addEventListener('click', function (e) {
+    if (e.target.closest('a, button')) return;
+    if ((info.classList.contains('panel') || info.classList.contains('sheet')) && e.target.closest('.about')) return;
+    closeInfo();
+  });
 
   fetch('items.json?v=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : []; })
