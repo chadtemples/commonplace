@@ -1,10 +1,8 @@
 ~/commonplace is a folder on my desktop. It is also this website.
 
-I was interested in the idea of a website with zero interface, published locally from a single folder on my desktop. 
+I drop things into the folder and they are automatically posted here. A website without an interface. A new type of posting gesture.
 
-I drop things into the folder and they are automatically posted here. Style and text is controlled for a simple .txt file in the folder.
-
-It's inspired by the concept of a commonplace book, the notebooks writers and thinkers used to keep track of interesting passages, quotes, scriptures, scraps of thought, ephemera. Commonplace books were a precursor to modern curation and digital scrapbook culture. 
+Inspired by "commonplace books," the notebooks writers and thinkers once used to keep track of quotes, scraps of thought, doodles, ephemera. Commonplace books were a precursor to modern curation and digital scrapbook culture.
 
 ---
 
